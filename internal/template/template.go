@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -31,9 +32,14 @@ type Renderer struct {
 	tmpl *template.Template
 }
 
-// NewRenderer creates a new template renderer
+// NewRenderer creates a new template renderer. Templates can use formatDate and formatDateJapanese in FuncMap.
 func NewRenderer(templatePath string) (*Renderer, error) {
-	tmpl, err := template.ParseFiles(templatePath)
+	funcMap := template.FuncMap{
+		"formatDate":         FormatDate,
+		"formatDateJapanese": FormatDateJapanese,
+	}
+	name := filepath.Base(templatePath)
+	tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(templatePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, fmt.Errorf("template not found: %s", templatePath)

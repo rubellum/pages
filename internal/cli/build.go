@@ -45,10 +45,21 @@ func ResolveSiteTitleFromIndex(inputDir string) string {
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
-	// Load configuration (returns default when pages.yaml does not exist)
+	inputDir, _ := cmd.Flags().GetString("input")
+	outputDir, _ := cmd.Flags().GetString("output")
+	count, err := doBuild(inputDir, outputDir)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Built %d pages\n", count)
+	return nil
+}
+
+// doBuild loads config, resolves site title, and runs the builder. Used by runBuild and tests.
+func doBuild(inputDir, outputDir string) (int, error) {
 	cfg, err := config.Load("pages.yaml")
 	if err != nil {
-		return fmt.Errorf("error: %w", err)
+		return 0, fmt.Errorf("error: %w", err)
 	}
 
 	// Resolve site title: pages.yaml title → index.md title → "Site"
@@ -66,11 +77,5 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	b := builder.New(cfg, opts)
-
-	// Execute build
-	if err := b.Build(); err != nil {
-		return fmt.Errorf("error: %w", err)
-	}
-
-	return nil
+	return b.Build()
 }

@@ -38,14 +38,8 @@ func TestE2E_InitThenBuild(t *testing.T) {
 		t.Fatalf("init failed: %v", err)
 	}
 
-	inputDir = "content"
-	outputDir = "public"
-	defer func() {
-		inputDir = "content"
-		outputDir = "public"
-	}()
-
-	if err := runBuild(nil, nil); err != nil {
+	_, err = doBuild("content", "public")
+	if err != nil {
 		t.Fatalf("build failed: %v", err)
 	}
 

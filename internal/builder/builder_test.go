@@ -73,7 +73,7 @@ Hello **world**!
 
 	b := New(cfg, opts)
 
-	if err := b.Build(); err != nil {
+	if _, err := b.Build(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 
@@ -126,7 +126,7 @@ Nested content.
 
 	b := New(cfg, opts)
 
-	if err := b.Build(); err != nil {
+	if _, err := b.Build(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 
@@ -166,7 +166,7 @@ func TestBuilder_CleanHTMLFiles(t *testing.T) {
 
 	b := New(cfg, opts)
 
-	if err := b.Build(); err != nil {
+	if _, err := b.Build(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 
@@ -205,7 +205,7 @@ Content.
 
 	b := New(cfg, opts)
 
-	err := b.Build()
+	_, err := b.Build()
 	if err == nil {
 		t.Error("Expected error for missing template")
 		return
@@ -235,7 +235,11 @@ func TestGetOutputPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			got := b.getOutputPath(tt.input)
+			got, err := b.getOutputPath(tt.input)
+			if err != nil {
+				t.Errorf("getOutputPath(%q) unexpected error: %v", tt.input, err)
+				return
+			}
 			if got != tt.want {
 				t.Errorf("getOutputPath(%q) = %q, want %q", tt.input, got, tt.want)
 			}
@@ -264,7 +268,7 @@ Content without date.
 
 	b := New(cfg, opts)
 
-	if err := b.Build(); err != nil {
+	if _, err := b.Build(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 
@@ -301,7 +305,7 @@ func TestBuilder_NoTitle(t *testing.T) {
 
 	b := New(cfg, opts)
 
-	if err := b.Build(); err != nil {
+	if _, err := b.Build(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 

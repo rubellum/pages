@@ -33,35 +33,34 @@ func New(cfg *config.Config, opts *Options) *Builder {
 	}
 }
 
-// Build executes the build process
-func (b *Builder) Build() error {
+// Build executes the build process. It returns the number of pages built.
+func (b *Builder) Build() (int, error) {
 	renderer, err := tmpl.NewRenderer(filepath.Join(b.options.TemplateDir, "base.html"))
 	if err != nil {
-		return fmt.Errorf("failed to load template: %w", err)
+		return 0, fmt.Errorf("failed to load template: %w", err)
 	}
 
 	if err := b.cleanHTMLFiles(); err != nil {
-		return fmt.Errorf("failed to clean output directory: %w", err)
+		return 0, fmt.Errorf("failed to clean output directory: %w", err)
 	}
 
 	mdFiles, err := b.findMarkdownFiles()
 	if err != nil {
-		return fmt.Errorf("failed to find markdown files: %w", err)
+		return 0, fmt.Errorf("failed to find markdown files: %w", err)
 	}
 
 	builtCount := 0
 	for _, mdFile := range mdFiles {
 		built, err := b.processFile(mdFile, renderer)
 		if err != nil {
-			return fmt.Errorf("failed to process %s: %w", mdFile, err)
+			return 0, fmt.Errorf("failed to process %s: %w", mdFile, err)
 		}
 		if built {
 			builtCount++
 		}
 	}
 
-	fmt.Printf("Built %d pages\n", builtCount)
-	return nil
+	return builtCount, nil
 }
 
 // cleanHTMLFiles removes all .html files from the output directory
@@ -119,7 +118,10 @@ func (b *Builder) processFile(mdPath string, renderer *tmpl.Renderer) (bool, err
 		return false, fmt.Errorf("failed to parse markdown in %s: %w", mdPath, err)
 	}
 
-	outputPath := b.getOutputPath(mdPath)
+	outputPath, err := b.getOutputPath(mdPath)
+	if err != nil {
+		return false, err
+	}
 	relPrefix := b.relPrefixFromOutputPath(outputPath)
 
 	hasTitle := result.Title != ""
@@ -151,11 +153,18 @@ func (b *Builder) processFile(mdPath string, renderer *tmpl.Renderer) (bool, err
 	return true, nil
 }
 
-// getOutputPath converts an input markdown path to an output HTML path
-func (b *Builder) getOutputPath(mdPath string) string {
-	relPath, _ := filepath.Rel(b.options.InputDir, mdPath)
+// getOutputPath converts an input markdown path to an output HTML path.
+// It returns an error if mdPath is not under InputDir (path traversal).
+func (b *Builder) getOutputPath(mdPath string) (string, error) {
+	relPath, err := filepath.Rel(b.options.InputDir, mdPath)
+	if err != nil {
+		return "", fmt.Errorf("invalid path %s: %w", mdPath, err)
+	}
+	if strings.Contains(filepath.ToSlash(relPath), "..") {
+		return "", fmt.Errorf("path traversal not allowed: %s", mdPath)
+	}
 	relPath = strings.TrimSuffix(relPath, ".md") + ".html"
-	return filepath.Join(b.options.OutputDir, relPath)
+	return filepath.Join(b.options.OutputDir, relPath), nil
 }
 
 // relPrefixFromOutputPath returns the relative path from the output file to site root (e.g. "" or "../", "../../").

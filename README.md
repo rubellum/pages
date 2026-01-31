@@ -68,7 +68,7 @@ title: "わたしのブログ"
 | `pages init` | 新規プロジェクト用のフォルダとひな形を作成 |
 | `pages build` | Markdown を HTML に変換（`content/` → `public/`） |
 
-入出力フォルダを変えたいときは `pages build -i 入力フォルダ -o 出力フォルダ` で指定できます。
+入出力フォルダを変えたいときは `pages build -i 入力フォルダ -o 出力フォルダ` で指定できます。HTML テンプレートはプロジェクトルートの `templates/`（`base.html`）を常に使用します。
 
 ---
 

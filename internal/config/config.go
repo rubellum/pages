@@ -7,7 +7,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config represents the site configuration from pages.yaml (optional)
+// Config represents the site configuration from pages.yaml (optional).
+// Empty fields are not filled here; the CLI layer fills them (e.g. site title from index.md or DefaultSiteTitle).
 type Config struct {
 	Title string `yaml:"title"`
 }

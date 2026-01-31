@@ -20,8 +20,9 @@ type ParseResult struct {
 	Content []byte
 }
 
-// Parse reads markdown and extracts title from the first # line; the rest is content.
-// If there is no # line, Title is empty and Content is the whole file.
+// Parse reads markdown and extracts title from the first line that is exactly "# " (hash + space) followed by the title; the rest is content.
+// Only "# " (single space after #) is treated as the title line; "#\t" or "## " are not.
+// If there is no such line, Title is empty and Content is the whole file.
 func Parse(data []byte) (*ParseResult, error) {
 	data = bytes.TrimSpace(data)
 	lines := strings.Split(string(data), "\n")
