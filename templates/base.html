@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{if .HasTitle}}{{.Title}} | {{end}}{{.Site.Title}}</title>
+    <link rel="stylesheet" href="{{.RelPrefix}}css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="{{.RelPrefix}}">Home</a>
+      </nav>
+    </header>
+    <main>
+      <article>
+        {{- if .HasTitle}}
+        <h1>{{.Title}}</h1>
+        {{- end}}
+        {{- if .HasDate}}
+        <time datetime="{{.Date}}">{{.DateFormatted}}</time>
+        {{- end}}
+        <div id="content">{{.Content}}</div>
+      </article>
+    </main>
+    <footer>
+      <p>&copy; 2025</p>
+    </footer>
+  </body>
+</html>
