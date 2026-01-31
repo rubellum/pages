@@ -2,54 +2,55 @@ package parser
 
 import (
 	"bytes"
-	"fmt"
-	"time"
+	"strings"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
-	"gopkg.in/yaml.v3"
 )
 
-var (
-	frontmatterDelimiter = []byte("---")
-	md                    = goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
-		goldmark.WithRendererOptions(html.WithUnsafe()),
-	)
+var md = goldmark.New(
+	goldmark.WithExtensions(extension.GFM),
+	goldmark.WithRendererOptions(html.WithUnsafe()),
 )
 
-// Frontmatter represents the YAML frontmatter of a Markdown file
-type Frontmatter struct {
-	Title string    `yaml:"title"`
-	Date  time.Time `yaml:"date"`
-}
-
-// ParseResult contains the parsed frontmatter and content
+// ParseResult contains the extracted title and body from a Markdown file
 type ParseResult struct {
-	Frontmatter *Frontmatter
-	Content     []byte
+	Title   string
+	Content []byte
 }
 
-// Parse extracts frontmatter and content from a Markdown file
+// Parse reads markdown and extracts title from the first # line; the rest is content.
+// If there is no # line, Title is empty and Content is the whole file.
 func Parse(data []byte) (*ParseResult, error) {
 	data = bytes.TrimSpace(data)
-	if !bytes.HasPrefix(data, frontmatterDelimiter) {
-		return nil, fmt.Errorf("invalid frontmatter: missing opening delimiter")
-	}
-	rest := data[len(frontmatterDelimiter):]
-	idx := bytes.Index(rest, frontmatterDelimiter)
-	if idx == -1 {
-		return nil, fmt.Errorf("invalid frontmatter: missing closing delimiter")
-	}
-	fmData := bytes.TrimSpace(rest[:idx])
-	content := bytes.TrimSpace(rest[idx+len(frontmatterDelimiter):])
+	lines := strings.Split(string(data), "\n")
 
-	var fm Frontmatter
-	if err := yaml.Unmarshal(fmData, &fm); err != nil {
-		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	var title string
+	var contentStart int
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "# ") {
+			title = strings.TrimSpace(trimmed[2:])
+			contentStart = i + 1
+			break
+		}
+		if trimmed != "" {
+			// First non-empty line is not a heading; no title
+			contentStart = 0
+			break
+		}
 	}
-	return &ParseResult{Frontmatter: &fm, Content: content}, nil
+
+	var content []byte
+	if contentStart > 0 {
+		content = []byte(strings.TrimSpace(strings.Join(lines[contentStart:], "\n")))
+	} else {
+		content = data
+	}
+
+	return &ParseResult{Title: title, Content: content}, nil
 }
 
 // ConvertMarkdown converts Markdown content to HTML

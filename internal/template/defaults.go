@@ -296,11 +296,8 @@ button:hover {
 }
 `
 
-// DefaultIndexMD is the sample TOP page; its title becomes the site title (zero-config)
-const DefaultIndexMD = `---
-title: "My Site"
-date: 2025-01-01
----
+// DefaultIndexMD is the sample TOP page; its first # line is used as the site title
+const DefaultIndexMD = `# My Site
 
 Welcome. This is the TOP page. The title above is used as the site title.
 `

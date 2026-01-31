@@ -17,8 +17,8 @@ func setupTestProject(t *testing.T) (string, func()) {
 		t.Fatal(err)
 	}
 
-	// Create directories
-	dirs := []string{"src", "public", "templates"}
+	// Create directories (default input is content/)
+	dirs := []string{"content", "public", "templates"}
 	for _, dir := range dirs {
 		if err := os.MkdirAll(filepath.Join(tmpDir, dir), 0755); err != nil {
 			os.RemoveAll(tmpDir)
@@ -56,21 +56,17 @@ func TestBuilder_Build(t *testing.T) {
 	tmpDir, cleanup := setupTestProject(t)
 	defer cleanup()
 
-	// Create test markdown file
-	mdContent := `---
-title: "Test Post"
-date: 2025-01-15
----
+	mdContent := `# Test Post
 
 Hello **world**!
 `
-	if err := os.WriteFile(filepath.Join(tmpDir, "src", "test.md"), []byte(mdContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "content", "test.md"), []byte(mdContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -90,11 +86,9 @@ Hello **world**!
 
 	html := string(content)
 
-	// Verify content
 	checks := []string{
 		"<title>Test Post | Test Site</title>",
 		"<h1>Test Post</h1>",
-		"2025年1月15日",
 		"<strong>world</strong>",
 	}
 
@@ -110,15 +104,12 @@ func TestBuilder_NestedDirectory(t *testing.T) {
 	defer cleanup()
 
 	// Create nested directory structure
-	nestedDir := filepath.Join(tmpDir, "src", "blog", "tech")
+	nestedDir := filepath.Join(tmpDir, "content", "blog", "tech")
 	if err := os.MkdirAll(nestedDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
-	mdContent := `---
-title: "Nested Post"
-date: 2025-01-15
----
+	mdContent := `# Nested Post
 
 Nested content.
 `
@@ -128,7 +119,7 @@ Nested content.
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -168,7 +159,7 @@ func TestBuilder_CleanHTMLFiles(t *testing.T) {
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -194,14 +185,11 @@ func TestBuilder_TemplateNotFound(t *testing.T) {
 	tmpDir, cleanup := setupTestProject(t)
 	defer cleanup()
 
-	// Create a markdown file that needs a template
-	mdContent := `---
-title: "Test"
----
+	mdContent := `# Test
 
 Content.
 `
-	if err := os.WriteFile(filepath.Join(tmpDir, "src", "test.md"), []byte(mdContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "content", "test.md"), []byte(mdContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -210,7 +198,7 @@ Content.
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -231,7 +219,7 @@ Content.
 func TestGetOutputPath(t *testing.T) {
 	b := &Builder{
 		options: &Options{
-			InputDir:  "src",
+			InputDir:  "content",
 			OutputDir: "public",
 		},
 	}
@@ -240,9 +228,9 @@ func TestGetOutputPath(t *testing.T) {
 		input string
 		want  string
 	}{
-		{"src/test.md", "public/test.html"},
-		{"src/blog/post.md", "public/blog/post.html"},
-		{"src/blog/tech/go.md", "public/blog/tech/go.html"},
+		{"content/test.md", "public/test.html"},
+		{"content/blog/post.md", "public/blog/post.html"},
+		{"content/blog/tech/go.md", "public/blog/tech/go.html"},
 	}
 
 	for _, tt := range tests {
@@ -259,20 +247,17 @@ func TestBuilder_NoDate(t *testing.T) {
 	tmpDir, cleanup := setupTestProject(t)
 	defer cleanup()
 
-	// Create markdown file without date
-	mdContent := `---
-title: "No Date Post"
----
+	mdContent := `# No Date Post
 
 Content without date.
 `
-	if err := os.WriteFile(filepath.Join(tmpDir, "src", "nodate.md"), []byte(mdContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "content", "nodate.md"), []byte(mdContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -292,14 +277,8 @@ Content without date.
 
 	html := string(content)
 
-	// Verify title is present
 	if !strings.Contains(html, "<h1>No Date Post</h1>") {
 		t.Error("Expected title to be present")
-	}
-
-	// Verify date is NOT present (no <time> element)
-	if strings.Contains(html, "<time>") {
-		t.Error("Expected no date to be displayed when date is not specified")
 	}
 }
 
@@ -307,20 +286,15 @@ func TestBuilder_NoTitle(t *testing.T) {
 	tmpDir, cleanup := setupTestProject(t)
 	defer cleanup()
 
-	// Create markdown file without title
-	mdContent := `---
-date: 2025-01-15
----
-
-Content without title.
+	mdContent := `Content without title.
 `
-	if err := os.WriteFile(filepath.Join(tmpDir, "src", "notitle.md"), []byte(mdContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "content", "notitle.md"), []byte(mdContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
 	cfg := &config.Config{Title: "Test Site"}
 	opts := &Options{
-		InputDir:    filepath.Join(tmpDir, "src"),
+		InputDir:    filepath.Join(tmpDir, "content"),
 		OutputDir:   filepath.Join(tmpDir, "public"),
 		TemplateDir: filepath.Join(tmpDir, "templates"),
 	}
@@ -340,19 +314,11 @@ Content without title.
 
 	html := string(content)
 
-	// Verify page title only shows site title
 	if !strings.Contains(html, "<title>Test Site</title>") {
 		t.Errorf("Expected <title>Test Site</title>, got: %s", html)
 	}
-
-	// Verify no h1 element for page title
 	if strings.Contains(html, "<h1>") {
 		t.Error("Expected no h1 when title is not specified")
-	}
-
-	// Verify date is present
-	if !strings.Contains(html, "<time>") {
-		t.Error("Expected date to be present")
 	}
 }
 

@@ -111,10 +111,9 @@ func (b *Builder) processFile(mdPath string, renderer *tmpl.Renderer) (bool, err
 
 	result, err := parser.Parse(data)
 	if err != nil {
-		return false, fmt.Errorf("invalid frontmatter in %s: %w", mdPath, err)
+		return false, fmt.Errorf("parse %s: %w", mdPath, err)
 	}
 
-	// Convert markdown to HTML
 	htmlContent, err := parser.ConvertMarkdown(result.Content)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse markdown in %s: %w", mdPath, err)
@@ -123,20 +122,14 @@ func (b *Builder) processFile(mdPath string, renderer *tmpl.Renderer) (bool, err
 	outputPath := b.getOutputPath(mdPath)
 	relPrefix := b.relPrefixFromOutputPath(outputPath)
 
-	hasTitle := result.Frontmatter.Title != ""
-	hasDate := !result.Frontmatter.Date.IsZero()
+	hasTitle := result.Title != ""
 	pageData := &tmpl.PageData{
-		Title:     result.Frontmatter.Title,
+		Title:     result.Title,
 		HasTitle:  hasTitle,
-		HasDate:   hasDate,
+		HasDate:   false,
 		Content:   template.HTML(htmlContent),
 		Site:      tmpl.SiteData{Title: b.config.Title},
 		RelPrefix: relPrefix,
-	}
-
-	if hasDate {
-		pageData.Date = tmpl.FormatDate(result.Frontmatter.Date)
-		pageData.DateFormatted = tmpl.FormatDateJapanese(result.Frontmatter.Date)
 	}
 
 	output, err := renderer.Render(pageData)

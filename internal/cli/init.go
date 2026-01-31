@@ -21,9 +21,9 @@ func init() {
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	// Create directory structure
+	// Create directory structure (default input is content/)
 	dirs := []string{
-		"src",
+		"content",
 		"public/css",
 		"templates",
 	}
@@ -45,12 +45,12 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create TOP page (its title becomes the site title)
-	if err := writeFileIfNotExists(filepath.Join("src", "index.md"), []byte(template.DefaultIndexMD)); err != nil {
+	if err := writeFileIfNotExists(filepath.Join("content", "index.md"), []byte(template.DefaultIndexMD)); err != nil {
 		return err
 	}
 
-	// Create .gitkeep in src (for when user deletes index.md and wants to keep dir)
-	if err := writeFileIfNotExists(filepath.Join("src", ".gitkeep"), []byte{}); err != nil {
+	// Create .gitkeep in content (for when user deletes index.md and wants to keep dir)
+	if err := writeFileIfNotExists(filepath.Join("content", ".gitkeep"), []byte{}); err != nil {
 		return err
 	}
 
@@ -59,8 +59,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("Created:")
 	fmt.Println("  templates/base.html - HTML template")
 	fmt.Println("  public/css/style.css - Default styles")
-	fmt.Println("  src/index.md       - TOP page (its title is the site title)")
-	fmt.Println("  src/               - Markdown source directory")
+	fmt.Println("  content/index.md   - TOP page (its title is the site title)")
+	fmt.Println("  content/           - Markdown content directory")
 	fmt.Println("")
 	fmt.Println("Next steps:")
 	fmt.Println("  1. Run 'pages build' to generate HTML")

@@ -24,7 +24,7 @@ var buildCmd = &cobra.Command{
 }
 
 func init() {
-	buildCmd.Flags().StringVarP(&inputDir, "input", "i", "src", "Input directory containing Markdown files")
+	buildCmd.Flags().StringVarP(&inputDir, "input", "i", "content", "Input directory containing Markdown files")
 	buildCmd.Flags().StringVarP(&outputDir, "output", "o", "public", "Output directory for generated HTML")
 	rootCmd.AddCommand(buildCmd)
 }
@@ -41,10 +41,7 @@ func ResolveSiteTitleFromIndex(inputDir string) string {
 	if err != nil {
 		return ""
 	}
-	if result.Frontmatter == nil {
-		return ""
-	}
-	return result.Frontmatter.Title
+	return result.Title
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {

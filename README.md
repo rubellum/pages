@@ -18,17 +18,14 @@ go install github.com/rubellum/pages@latest
 pages init
 ```
 
-`src/`（Markdown 用）、`templates/`（HTML テンプレート）、`public/`（スタイル用）ができ、TOP ページのひな形 `src/index.md` が作成されます。
+`content/`（Markdown 用）、`templates/`（HTML テンプレート）、`public/`（スタイル用）ができ、TOP ページのひな形 `content/index.md` が作成されます。
 
 **2. ページを書く**
 
-`src/` に `.md` ファイルを置きます。先頭にタイトルと日付を書く形式です。
+`content/` に `.md` ファイルを置きます。1行目を `# タイトル` にすると、その行がページタイトルになります。
 
 ```markdown
----
-title: "はじめての記事"
-date: 2025-01-15
----
+# はじめての記事
 
 ここに本文を書く。
 ```
@@ -45,8 +42,8 @@ pages build
 
 ## 日常の使い方
 
-- **TOP ページ** … `src/index.md` の `title` がサイトのタイトルになります。
-- **記事を増やす** … `src/` に新しい `.md` を追加するだけ。サブフォルダ（例: `src/blog/hello.md`）も使えます。
+- **TOP ページ** … `content/index.md` の1行目（`# タイトル`）がサイトのタイトルになります。
+- **記事を増やす** … `content/` に新しい `.md` を追加するだけ。サブフォルダ（例: `content/blog/hello.md`）も使えます。
 - **ビルド** … 更新のたびに `pages build` を実行。
 - **プレビュー** … ビルド後、`public/` をローカルで開いて確認。例: `cd public && python -m http.server 3000` で http://localhost:3000 を開く。
 
@@ -69,7 +66,7 @@ title: "わたしのブログ"
 | コマンド | 説明 |
 |----------|------|
 | `pages init` | 新規プロジェクト用のフォルダとひな形を作成 |
-| `pages build` | Markdown を HTML に変換（`src/` → `public/`） |
+| `pages build` | Markdown を HTML に変換（`content/` → `public/`） |
 
 入出力フォルダを変えたいときは `pages build -i 入力フォルダ -o 出力フォルダ` で指定できます。
 

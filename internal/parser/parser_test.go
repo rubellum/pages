@@ -3,7 +3,6 @@ package parser
 import (
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestParse(t *testing.T) {
@@ -11,110 +10,56 @@ func TestParse(t *testing.T) {
 		name      string
 		input     string
 		wantTitle string
-		wantDate  string
 		wantBody  string
-		wantErr   bool
-		errMsg    string
 	}{
 		{
-			name: "valid frontmatter",
-			input: `---
-title: "Hello World"
-date: 2025-01-15
----
-
-This is the content.`,
+			name:      "first line is h1",
+			input:     "# Hello World\n\nThis is the content.",
 			wantTitle: "Hello World",
-			wantDate:  "2025-01-15",
 			wantBody:  "This is the content.",
-			wantErr:   false,
 		},
 		{
-			name:    "missing opening delimiter",
-			input:   `title: "Test"`,
-			wantErr: true,
-			errMsg:  "missing opening delimiter",
-		},
-		{
-			name: "missing closing delimiter",
-			input: `---
-title: "Test"
-date: 2025-01-15`,
-			wantErr: true,
-			errMsg:  "missing closing delimiter",
-		},
-		{
-			name: "optional title (no title)",
-			input: `---
-date: 2025-01-15
----
-
-Content without title.`,
+			name:      "no h1, full content",
+			input:     "This is the content.",
 			wantTitle: "",
-			wantDate:  "2025-01-15",
-			wantBody:  "Content without title.",
-			wantErr:   false,
+			wantBody:  "This is the content.",
 		},
 		{
-			name: "optional date (no date)",
-			input: `---
-title: "No Date Post"
----
-
-Content without date.`,
+			name:      "h1 with extra spaces",
+			input:     "#  No Date Post  \n\nContent without date.",
 			wantTitle: "No Date Post",
-			wantDate:  "",
 			wantBody:  "Content without date.",
-			wantErr:   false,
 		},
 		{
-			name: "invalid yaml",
-			input: `---
-title: "unclosed
-date: 2025-01-15
----
-
-Content.`,
-			wantErr: true,
-			errMsg:  "failed to parse frontmatter",
+			name:      "empty file",
+			input:     "",
+			wantTitle: "",
+			wantBody:  "",
+		},
+		{
+			name:      "only h1",
+			input:     "# Only Title",
+			wantTitle: "Only Title",
+			wantBody:  "",
+		},
+		{
+			name:      "h2 first, no title",
+			input:     "## Not H1\n\nBody.",
+			wantTitle: "",
+			wantBody:  "## Not H1\n\nBody.",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := Parse([]byte(tt.input))
-
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("expected error containing %q, got nil", tt.errMsg)
-					return
-				}
-				if tt.errMsg != "" && !strings.Contains(err.Error(), tt.errMsg) {
-					t.Errorf("expected error containing %q, got %q", tt.errMsg, err.Error())
-				}
-				return
-			}
-
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
-
-		if result.Frontmatter.Title != tt.wantTitle {
-			t.Errorf("title: got %q, want %q", result.Frontmatter.Title, tt.wantTitle)
-		}
-
-		if tt.wantDate == "" {
-			if !result.Frontmatter.Date.IsZero() {
-				t.Errorf("date: expected zero value, got %v", result.Frontmatter.Date)
+			if result.Title != tt.wantTitle {
+				t.Errorf("title: got %q, want %q", result.Title, tt.wantTitle)
 			}
-		} else {
-			expectedDate, _ := time.Parse("2006-01-02", tt.wantDate)
-			if !result.Frontmatter.Date.Equal(expectedDate) {
-				t.Errorf("date: got %v, want %v", result.Frontmatter.Date, expectedDate)
-			}
-		}
-
 			content := strings.TrimSpace(string(result.Content))
 			if content != tt.wantBody {
 				t.Errorf("content: got %q, want %q", content, tt.wantBody)
@@ -193,7 +138,6 @@ func TestConvertMarkdown(t *testing.T) {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
-
 			html := string(result)
 			for _, want := range tt.contains {
 				if !strings.Contains(html, want) {
@@ -203,4 +147,3 @@ func TestConvertMarkdown(t *testing.T) {
 		})
 	}
 }
-
