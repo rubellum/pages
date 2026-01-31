@@ -1,0 +1,304 @@
+package template
+
+// DefaultBaseHTML is the default base template
+const DefaultBaseHTML = `<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{if .HasTitle}}{{.Title}} | {{end}}{{.Site.Title}}</title>
+    <link rel="stylesheet" href="{{.RelPrefix}}css/style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="{{.RelPrefix}}">Home</a>
+      </nav>
+    </header>
+    <main>
+      <article>
+        {{- if .HasTitle}}
+        <h1>{{.Title}}</h1>
+        {{- end}}
+        {{- if .HasDate}}
+        <time datetime="{{.Date}}">{{.DateFormatted}}</time>
+        {{- end}}
+        <div id="content">{{.Content}}</div>
+      </article>
+    </main>
+    <footer>
+      <p>&copy; 2025</p>
+    </footer>
+  </body>
+</html>
+`
+
+// DefaultStyleCSS is the default stylesheet
+const DefaultStyleCSS = `/* Base Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Root Variables */
+:root {
+  --color-bg: #fafafa;
+  --color-text: #333;
+  --color-text-muted: #666;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-border: #e5e7eb;
+  --color-code-bg: #f3f4f6;
+  --color-blockquote-border: #d1d5db;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --max-width: 720px;
+  --spacing: 1.5rem;
+}
+
+/* Typography */
+html {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: 600;
+}
+
+em {
+  font-style: italic;
+}
+
+/* Lists */
+ul, ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.25rem;
+}
+
+li > ul,
+li > ol {
+  margin-bottom: 0;
+  margin-top: 0.25rem;
+}
+
+/* Code */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--color-code-bg);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Blockquote */
+blockquote {
+  border-left: 4px solid var(--color-blockquote-border);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 1rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+th, td {
+  border: 1px solid var(--color-border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background-color: var(--color-code-bg);
+  font-weight: 600;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+figure {
+  margin-bottom: 1rem;
+}
+
+figcaption {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+/* Layout */
+header {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing);
+}
+
+header nav {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+header nav a {
+  font-weight: 500;
+}
+
+main {
+  flex: 1;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing);
+  width: 100%;
+}
+
+article h1:first-child {
+  margin-top: 0;
+}
+
+article time {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+}
+
+#content {
+  margin-top: 1rem;
+}
+
+footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Form Elements */
+input,
+textarea,
+button {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input,
+textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.375rem; }
+  h3 { font-size: 1.125rem; }
+}
+`
+
+// DefaultIndexMD is the sample TOP page; its first # line is used as the site title
+const DefaultIndexMD = `# My Site
+
+Welcome. This is the TOP page. The title above is used as the site title.
+`
+
